@@ -61,6 +61,8 @@
         </section>
         <article class="post-content">
         
+            <blockquote>这篇文章上次修改于 389 天前，可能其部分内容已经发生变化，如有疑问可询问作者。</blockquote>
+        
             <h1 id="week2"><a href="#week2" class="headerlink" title="week2"></a>week2</h1><h2 id="web"><a href="#web" class="headerlink" title="web"></a>web</h2><h3 id="hello-include"><a href="#hello-include" class="headerlink" title="hello_include"></a>hello_include</h3><p>提示存在信息泄露，访问index.phps</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;Hint: The source code contains important information that must not be disclosed.&lt;br&gt;&quot;</span>;</span><br><span class="line"><span class="variable">$allowed</span> = [<span class="string">&#x27;hello.php&#x27;</span>, <span class="string">&#x27;phpinfo.php&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;f1Ie&#x27;</span>])) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">strpos</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;f1Ie&#x27;</span>], <span class="string">&#x27;php://&#x27;</span>) !== <span class="literal">false</span>) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&#x27;不允许php://&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$_POST</span>[<span class="string">&#x27;f1Ie&#x27;</span>];</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">include</span> <span class="string">&#x27;hello.php&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
@@ -216,7 +218,7 @@
             </div>
         </section>
         <section class="sub-footer">
-            <p>© 2024 <a href="/">N0tluS.site</a>. All Rights Reserved. Theme By <a href="https://github.com/Dreamer-Paul/Hingle" target="_blank" rel="nofollow">Hingle</a>.</p>
+            <p>© 2025 <a href="/">N0tluS.site</a>. All Rights Reserved. Theme By <a href="https://github.com/Dreamer-Paul/Hingle" target="_blank" rel="nofollow">Hingle</a>.</p>
         </section>
     </div>
 </footer>
